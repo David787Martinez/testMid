@@ -1,20 +1,20 @@
 package com.chakray.testmid.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -25,9 +25,9 @@ import java.util.Date;
 public class UsersModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private Integer id;
+    private UUID id;
 
     @Email
     @Column(name = "email", nullable = false, length = 100)
@@ -61,14 +61,17 @@ public class UsersModel {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<AddressModel> addresses;
+
     public UsersModel() {
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -118,6 +121,14 @@ public class UsersModel {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<AddressModel> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<AddressModel> addresses) {
+        this.addresses = addresses;
     }
 
 }

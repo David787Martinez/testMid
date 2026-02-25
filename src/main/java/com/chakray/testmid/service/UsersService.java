@@ -1,5 +1,6 @@
 package com.chakray.testmid.service;
 
+import com.chakray.testmid.model.AddressModel;
 import com.chakray.testmid.model.UsersModel;
 import com.chakray.testmid.repository.UsersRepository;
 import java.time.LocalDateTime;
@@ -7,6 +8,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
@@ -33,6 +35,10 @@ public class UsersService {
         ZoneId zone = ZoneId.of("Indian/Antananarivo");
         LocalDateTime now = ZonedDateTime.now(zone).toLocalDateTime();
         user.setCreatedAt(now);
+
+        for (AddressModel address : user.getAddresses()) {
+            address.setUser(user);
+        }
 
         return usersRepository.save(user);
     }
@@ -97,7 +103,7 @@ public class UsersService {
         if (filter == null || filter.isEmpty()) {
             throw new RuntimeException("El filter no puede estar vacio.");
         }
-        System.out.println("filter "+filter);
+        System.out.println("filter " + filter);
 //        String[] parts = filter.split("\\+");
         String[] parts = filter.split(" ");
         if (parts.length != 3) {
@@ -105,12 +111,12 @@ public class UsersService {
         }
 
         String clave = parts[0];
-        String casoUso = parts[1]; 
+        String casoUso = parts[1];
         String value = parts[2];
-        
-        System.out.println("clave "+clave);
-        System.out.println("casoUso "+casoUso);
-        System.out.println("value "+value);
+
+        System.out.println("clave " + clave);
+        System.out.println("casoUso " + casoUso);
+        System.out.println("value " + value);
 
         List<String> listaClaves = List.of(
                 "email", "id", "name", "phone", "taxId", "createdAt"
@@ -119,7 +125,7 @@ public class UsersService {
         if (!listaClaves.contains(clave)) {
             throw new RuntimeException("Clave invalida");
         }
-        
+
         //con JPA nos ayuda hacer como si fuera nuestro where
         Specification<UsersModel> spec = (root, query, cb) -> {
 
@@ -143,6 +149,17 @@ public class UsersService {
         };
 
         return usersRepository.findAll(spec);
+    }
+
+    public UsersModel login(String taxId, String pass) {
+
+        Optional<UsersModel> user = usersRepository.findByTaxId(taxId);
+
+        if (!user.get().getPassword().equals(pass)) {
+            throw new RuntimeException("Usario y/o contraseña incorrectas, favor de validar.");
+        }
+
+        return user.get();
     }
 
 }
